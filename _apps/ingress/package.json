@@ -1,0 +1,24 @@
+{
+  "name": "@core/ingress",
+  "private": true,
+  "version": "1.0.0",
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/Bootstrap.ts",
+    "make:module": "tsx scripts/make-module.ts",
+    "start": "npm run build && node dist/Bootstrap.js"
+  },
+  "dependencies": {
+    "@core/building-blocks": "^1.0.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^4.2.0",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}

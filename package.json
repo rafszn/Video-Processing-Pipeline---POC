@@ -1,0 +1,26 @@
+{
+  "name": "platform",
+  "author": "rm",
+  "private": true,
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsx _scripts/dev.ts",
+    "build:watch": "tsc -b --watch"
+  },
+  "workspaces": [
+    "_apps/*",
+    "_packages/*"
+  ],
+  "devDependencies": {
+    "tsx": "^4.23.13",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0",
+    "typescript": "^6.0.0",
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^26.4.1",
+    "concurrently": "^10.0.5",
+    "typescript-eslint": "^8.69.0"
+  }
+}
