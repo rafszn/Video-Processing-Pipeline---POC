@@ -1,12 +1,13 @@
-import type { Response } from "express";
 import type { ProxyConfig } from "./types.js";
 import logger from "../global/library/logger.js";
+import type { Request, Response } from "express";
 import { getForwardedHeaders } from "./headers.js";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { HTTP_STATUS } from "../global/constants/http-status-codes.js";
+import { attachInternalServiceToken } from "./attach-internal-token.js";
 
 export function createServiceProxy(config: ProxyConfig) {
-  return createProxyMiddleware({
+  const proxyMiddleware = createProxyMiddleware({
     target: config.target,
     changeOrigin: config.changeOrigin ?? true,
     proxyTimeout: config.timeout ?? 10_000,
@@ -14,7 +15,8 @@ export function createServiceProxy(config: ProxyConfig) {
 
     on: {
       proxyReq: (proxyReq, req) => {
-        const forwardedHeaders = getForwardedHeaders(req);
+        const request = req as Request;
+        const forwardedHeaders = getForwardedHeaders(request);
 
         for (const [key, value] of Object.entries(forwardedHeaders)) {
           if (value) {
@@ -22,7 +24,13 @@ export function createServiceProxy(config: ProxyConfig) {
           }
         }
 
-        logger.debug(`[${config.serviceName}] Proxying request`, {
+        proxyReq.removeHeader("x-internal-token"); // never trust the client's copy
+        if (request.internalServiceToken) {
+          proxyReq.setHeader("x-internal-token", request.internalServiceToken);
+        }
+
+        logger.info(`Proxying request`, {
+          to: `[${config.serviceName} service]`,
           requestId: req.headers["x-request-id"],
           method: req.method,
           path: req.url,
@@ -51,4 +59,6 @@ export function createServiceProxy(config: ProxyConfig) {
       },
     },
   });
+
+  return [attachInternalServiceToken(config), proxyMiddleware];
 }

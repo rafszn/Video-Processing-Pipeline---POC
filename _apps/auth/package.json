@@ -1,0 +1,23 @@
+{
+  "name": "@core/auth",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/Bootstrap.ts",
+    "make:module": "tsx scripts/make-module.ts",
+    "start": "npm run build && node dist/Bootstrap.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@core/building-blocks": "^1.0.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}

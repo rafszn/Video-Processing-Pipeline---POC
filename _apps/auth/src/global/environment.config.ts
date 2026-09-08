@@ -6,16 +6,13 @@ const envFile = `.env.${process.env.NODE_ENV || "development"}`;
 dotenv.config({ path: envFile });
 
 const envSchema = z.object({
-  APP_NAME: z.string().default("ingress"),
+  APP_NAME: z.string().default("auth"),
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
-  PORT: z.coerce.number().default(5000),
+  PORT: z.coerce.number().default(5001),
 
-  AUTH_SERVICE_URL: z.string().default("http://localhost:5001"),
-  USER_SERVICE_URL: z.string().default("http://localhost:5002"),
-  MEDIA_SERVICE_URL: z.string().default("http://localhost:5003"),
-  PAYMENT_SERVICE_URL: z.string().default("http://localhost:5004"),
+  ALLOWED_INTERNAL_CALLERS: z.string().default("ingress"), //comma seperated string pf service names
 
   /* ---------- cache config ---------- */
   CACHE_DRIVER: z.enum(["redis", "memory"]).default("memory"),

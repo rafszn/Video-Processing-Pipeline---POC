@@ -6,17 +6,19 @@ const router = Router();
 
 router.use(
   "/auth",
-  createServiceProxy({
-    serviceName: services.auth.serviceName,
+  ...createServiceProxy({
+    id: services.auth.id,
     target: services.auth.target,
+    serviceName: services.auth.serviceName,
   }),
 );
 
 router.use(
   "/users",
-  createServiceProxy({
-    serviceName: services.users.serviceName,
+  ...createServiceProxy({
+    id: services.users.id,
     target: services.users.target,
+    serviceName: services.users.serviceName,
   }),
 );
 

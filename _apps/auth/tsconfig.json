@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+
+  "references": [{ "path": "../../_packages/building-blocks" }],
+
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
+}

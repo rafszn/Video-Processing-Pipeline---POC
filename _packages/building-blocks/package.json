@@ -34,6 +34,10 @@
     "./logger": {
       "import": "./dist/Logger/index.js",
       "types": "./dist/Logger/index.d.ts"
+    },
+    "./s2s-auth": {
+      "import": "./dist/InternalAuth/index.js",
+      "types": "./dist/InternalAuth/index.d.ts"
     }
   },
   "dependencies": {
@@ -49,6 +53,7 @@
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
     "ioredis": "^5.11.1",
+    "jose": "^6.2.12",
     "jsonwebtoken": "^9.0.3",
     "mime-types": "^3.0.2",
     "mongoose": "^9.0.1",
