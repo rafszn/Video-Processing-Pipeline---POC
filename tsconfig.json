@@ -1,7 +1,6 @@
 {
   "files": [],
   "references": [
-    { "path": "./_apps/auth" },
     { "path": "./_apps/ingress" },
     { "path": "./_packages/building-blocks" }
   ]

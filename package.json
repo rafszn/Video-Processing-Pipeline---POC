@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsx _scripts/dev.ts",
-    "build:watch": "tsc -b --watch"
+    "build:watch": "tsc -b --watch",
+    "make:service": "tsx _scripts/make-service.ts"
   },
   "workspaces": [
     "_apps/*",

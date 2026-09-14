@@ -13,13 +13,4 @@ router.use(
   }),
 );
 
-router.use(
-  "/users",
-  ...createServiceProxy({
-    id: services.users.id,
-    target: services.users.target,
-    serviceName: services.users.serviceName,
-  }),
-);
-
 export default router;
