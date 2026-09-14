@@ -8,15 +8,22 @@ dotenv.config({ path: envFile });
 const envSchema = z.object({
   APP_NAME: z.string().default("auth"),
   NODE_ENV: z
-    .enum(["development", "test", "production"])
+    .enum(["development", "production"])
     .default("development"),
   PORT: z.coerce.number().default(5001),
 
-  ALLOWED_INTERNAL_CALLERS: z.string().default("ingress"), //comma seperated string pf service names
+  ALLOWED_INTERNAL_CALLERS: z.string().default("ingress"), //comma seperated string of service names
 
   /* ---------- cache config ---------- */
-  CACHE_DRIVER: z.enum(["redis", "memory"]).default("memory"),
   REDIS_URL: z.string().optional(),
+  CACHE_DRIVER: z.enum(["redis", "memory"]).default("memory"),
+
+  /* ---------- rabbitmq config ------- */
+  RABBITMQ_HOST: z.string().optional(),
+  RABBITMQ_VHOST: z.string().optional(),
+  RABBITMQ_USERNAME: z.string().optional(),
+  RABBITMQ_PASSWORD: z.string().optional(),
+  RABBITMQ_PORT: z.coerce.number().optional(),
 });
 
 const env = loadEnv(envSchema, "ingress");

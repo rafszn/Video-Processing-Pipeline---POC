@@ -12,6 +12,8 @@ yarn-error.log*
 # Code coverage
 coverage
 
+tests
+
 # misc
 .DS_Store
 .env

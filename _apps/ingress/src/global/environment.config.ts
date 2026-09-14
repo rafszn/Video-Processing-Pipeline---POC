@@ -12,6 +12,8 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().default(5000),
 
+  WHITELISTED: z.string().default(""),
+
   AUTH_SERVICE_URL: z.string().default("http://localhost:5001"),
   USER_SERVICE_URL: z.string().default("http://localhost:5002"),
   MEDIA_SERVICE_URL: z.string().default("http://localhost:5003"),

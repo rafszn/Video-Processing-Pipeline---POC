@@ -38,11 +38,41 @@
     "./s2s-auth": {
       "import": "./dist/InternalAuth/index.js",
       "types": "./dist/InternalAuth/index.d.ts"
+    },
+    "./messaging": {
+      "import": "./dist/Messaging/index.js",
+      "types": "./dist/Messaging/index.d.ts"
+    },
+    "./validator": {
+      "import": "./dist/Validator/index.js",
+      "types": "./dist/Validator/index.d.ts"
+    },
+    "./exceptions": {
+      "import": "./dist/Exceptions/index.js",
+      "types": "./dist/Exceptions/index.d.ts"
+    },
+    "./time": {
+      "import": "./dist/Time/index.js",
+      "types": "./dist/Time/index.d.ts"
+    },
+    "./rate-limiter": {
+      "import": "./dist/RateLimiter/index.js",
+      "types": "./dist/RateLimiter/index.d.ts"
+    },
+    "./http": {
+      "import": "./dist/HttpClient/index.js",
+      "types": "./dist/HttpClient/index.d.ts"
+    },
+    "./health": {
+      "import": "./dist/Health/index.js",
+      "types": "./dist/Health/index.d.ts"
     }
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1078.0",
     "@scalar/express-api-reference": "^0.10.8",
+    "amqplib": "^2.0.1",
+    "axios": "^1.20.0",
     "cloudinary": "^2.9.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
@@ -60,15 +90,21 @@
     "morgan": "^1.12.0",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
+    "opossum": "^10.0.0",
+    "p-retry": "^8.0.1",
+    "rate-limit-redis": "^6.0.1",
+    "reflect-metadata": "^0.2.2",
     "resend": "^6.16.0",
     "sharp": "^0.35.3",
     "streamifier": "^0.1.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
+    "tsyringe": "^4.10.0",
     "winston": "^3.19.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.8",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.10",
@@ -81,6 +117,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^25.0.3",
     "@types/node-cron": "^3.0.11",
+    "@types/opossum": "^8.1.9",
     "@types/streamifier": "^0.1.2",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8"

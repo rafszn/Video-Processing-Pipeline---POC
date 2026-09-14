@@ -1,22 +1,23 @@
 import hpp from "hpp";
+import cors from "cors";
 import helmet from "helmet";
 import Routes from "./Routes.js";
 import compression from "compression";
+import { redis } from "./ext/redis.js";
 import cookieParser from "cookie-parser";
 import express, { Application } from "express";
 import logger from "./global/library/logger.js";
 import env from "./global/environment.config.js";
+import { MINUTE } from "@core/building-blocks/time";
+import { health } from "@core/building-blocks/health";
 import { requestLogger } from "@core/building-blocks/logger";
+import corsOptions from "./global/constants/cors-options.js";
 import { requestId } from "./global/middlewares/request-id.js";
+import { errorHandler } from "@core/building-blocks/exceptions";
+import { notFoundHandler } from "./global/middlewares/not-found.js";
+import { requestGuard } from "./global/middlewares/request-guard.js";
 import { HTTP_STATUS } from "./global/constants/http-status-codes.js";
-// import corsOptions from "./global/constants/cors-options.js";
-// import requestLogger from "./global/middlewares/request-logger.js";
-// import { notFoundHandler } from "./global/middlewares/not-found.js";
-// import { errorHandler } from "./global/middlewares/error-handler.js";
-// import { requestGuard } from "./global/middlewares/request-guard.js";
-// import { globalRateLimiter } from "./global/middlewares/rate-limiter.js";
-// import { setupSwaggerDocs } from "./docs/swagger.js";
-// import cors from "cors";
+import { createRateLimiter } from "@core/building-blocks/rate-limiter";
 
 export default class App {
   public app: Application;
@@ -25,55 +26,43 @@ export default class App {
   }
 
   async initialize() {
-    this.app.set("trust proxy", true); // req.ip
+    this.app.set("trust proxy", true);
+
     this.app.use(requestId);
 
-    // security middlewares
     this.app.use(helmet({ contentSecurityPolicy: false }));
-    // this.app.use(cors(corsOptions));
-    this.app.use(compression());
+    this.app.use(cors(corsOptions));
     this.app.use(hpp());
-    this.app.use(cookieParser());
+
     this.app.use(requestLogger);
-    // this.app.use(globalRateLimiter);
-    // this.app.use(requestGuard); // block scanners / traversal
-    // this.app.use(express.static("public"));
+    this.app.use(
+      createRateLimiter({
+        redis,
+        limit: 200,
+        windowMs: 10 * MINUTE,
+      }),
+    );
+
+    this.app.use(compression());
+    this.app.use(cookieParser());
+
+    this.app.use(requestGuard);
 
     // health check
-    this.app.get("/health", (req, res) => {
-      const uptime = process.uptime();
-      const days = Math.floor(uptime / 86400);
-      const seconds = Math.floor(uptime % 60);
-      const minutes = Math.floor((uptime % 3600) / 60);
-      const hours = Math.floor((uptime % 86400) / 3600);
-
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        status: "healthy",
-        service: "ingress",
-        uptime: {
-          seconds: uptime,
-          human: `${days}d ${hours}h ${minutes}m ${seconds}s`,
-        },
-        timestamp: new Date().toISOString(),
-      });
-    });
+    this.app.get("/health", health(env.APP_NAME));
 
     this.app.get("/", (req, res) => {
       res.status(HTTP_STATUS.OK).json({
-        server: "ingress",
+        server: env.APP_NAME,
       });
     });
 
     // routes
-    this.app.use("/v1", Routes);
-
-    //docs
-    // setupSwaggerDocs(this.app);
+    this.app.use(Routes);
 
     // 404 and error handler
-    // this.app.use(notFoundHandler);
-    // this.app.use(errorHandler);
+    this.app.use(notFoundHandler);
+    this.app.use(errorHandler);
   }
 
   listen(port: number) {

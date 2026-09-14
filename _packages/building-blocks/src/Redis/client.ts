@@ -1,4 +1,5 @@
 import { Redis } from "ioredis";
+import { logger } from "../Logger/winstonLogger.js";
 
 export interface CreateRedisClientConfig {
   redisUrl: string;
@@ -8,7 +9,7 @@ export function createRedisClient(
   config: CreateRedisClientConfig,
 ): Redis | null {
   if (!config.redisUrl) {
-    console.warn("[Redis] redisUrl is not set. Redis client was not created.");
+    logger.warn("[Redis] redisUrl is not set. Redis client was not created.");
     return null;
   }
 
@@ -19,19 +20,19 @@ export function createRedisClient(
   });
 
   redis.on("connect", () => {
-    console.info("[Redis] Connected.");
+    logger.info("[Redis] Connected.");
   });
 
   redis.on("ready", () => {
-    console.info("[Redis] Ready.");
+    logger.info("[Redis] Ready.");
   });
 
   redis.on("error", (error) => {
-    console.error("[Redis] Error:", error.message);
+    logger.error("[Redis] Error:", error.message);
   });
 
   redis.on("close", () => {
-    console.warn("[Redis] Connection closed.");
+    logger.warn("[Redis] Connection closed.");
   });
 
   return redis;

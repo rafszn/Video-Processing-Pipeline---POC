@@ -10,7 +10,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": false,
+    "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
 
     /* Added for monorepo support */
