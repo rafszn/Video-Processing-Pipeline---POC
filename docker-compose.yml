@@ -1,0 +1,69 @@
+# Production-style base. Every service builds its `production` Dockerfile target: compiled JS, no source mounted, no hot reload.
+#
+#   docker compose -f docker-compose.yml up --build
+#
+# For local dev, just run `docker compose up --build` with no -f flag —
+# Compose auto-merges docker-compose.override.yml on top of this, which switches every app service to its `dev` target, mounts live source, and publishes each service's port directly for debugging. See that file for what changes.
+#
+# Only ingress publishes a port here — it's the one public entry point;
+# internal services talk to each other over the compose network by
+# service name (e.g. http://auth:5001), never through the host.
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # clean ui for rabbitMQ
+  rabbitscout:
+    image: ghcr.io/ralve-org/rabbitscout:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 15672
+      RABBITMQ_PROTOCOL: http
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  ingress:
+    build:
+      context: .
+      dockerfile: _apps/ingress/Dockerfile
+      target: production
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379
+      INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-...}
+      # AUTH_SERVICE_URL: http://auth:5001
+
+volumes:
+  redis-data:
+  rabbitmq-data:

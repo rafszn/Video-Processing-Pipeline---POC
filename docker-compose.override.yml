@@ -1,0 +1,18 @@
+# Dev overrides — auto-merged on top of docker-compose.yml by `docker compose up` whenever this file sits next to it ( Compose's default behavior).
+#
+# What changes vs. the base: each app service switches to its `dev` build target (tsx watch, not compiled JS), mounts source for hot reload, and publishes its own port for direct debugging (the base only publishes ingress's port).
+#
+# Only _apps/<service> and _packages/building-blocks are mounted — not the whole repo — so the image's own /app/node_modules is left untouched by the mount and doesn't need protecting with an extra anonymous volume.
+#
+# Production run, skipping this file:
+#   docker compose -f docker-compose.yml up --build
+
+services:
+  ingress:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./_apps/ingress:/app/_apps/ingress
+      - ./_packages/building-blocks:/app/_packages/building-blocks

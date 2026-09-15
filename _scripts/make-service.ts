@@ -73,6 +73,48 @@ RABBITMQ_PORT=
 `,
   },
   {
+    path: "Dockerfile",
+    content: ({ name, port }) => `# syntax=docker/dockerfile:1
+#
+# Auto-generated for the "${name}" service
+#
+# Build context MUST be the repo root — npm workspaces needs every
+# workspace's package.json to resolve @core/building-blocks correctly:
+#
+#   docker build -f _apps/${name}/Dockerfile --target production -t ${name} .
+#
+# Not meant to be built by hand day-to-day — see docker-compose.yml / docker-compose.override.yml at the repo root, which set the right target (dev vs production) and env vars for you.
+ 
+ARG NODE_VERSION=22-alpine
+ 
+# deps
+FROM node:\${NODE_VERSION} AS deps
+WORKDIR /app
+COPY . .
+RUN npm ci
+ 
+# build: compile every workspace (building-blocks + all apps)
+FROM deps AS build
+RUN npm run build
+ 
+# dev: run TS directly via tsx watch; compose mounts live
+FROM deps AS dev
+WORKDIR /app/_apps/${name}
+ENV NODE_ENV=development
+EXPOSE ${port}
+CMD ["npx", "tsx", "watch", "src/Bootstrap.ts"]
+ 
+# production: compiled JS, no live-reload
+# Note: this still carries the full monorepo's node_modules (incl.
+# devDependencies) and every workspace's compiled dist, not just ${name}
+FROM build AS production
+ENV NODE_ENV=production
+WORKDIR /app/_apps/${name}
+EXPOSE ${port}
+CMD ["node", "dist/Bootstrap.js"]
+`,
+  },
+  {
     path: "tsconfig.json",
     content: () => `{
   "extends": "../../tsconfig.base.json",
@@ -564,6 +606,86 @@ function updateServicesMap(kebab: string, camel: string): boolean {
   return true;
 }
 
+function hasComposeService(content: string, name: string): boolean {
+  // Matches a top-level (2-space indented) service key, e.g. "  auth:".
+  return new RegExp(`^  ${name}:`, "m").test(content);
+}
+
+function updateDockerCompose(name: string, port: number): boolean {
+  const composePath = path.join(ROOT, "docker-compose.yml");
+  if (!fs.existsSync(composePath)) return false;
+
+  let content = fs.readFileSync(composePath, "utf8");
+  if (hasComposeService(content, name)) return false;
+
+  const block = `  ${name}:
+    build:
+      context: .
+      dockerfile: _apps/${name}/Dockerfile
+      target: production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: ${port}
+      ALLOWED_INTERNAL_CALLERS: ingress
+      CACHE_DRIVER: redis
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: \${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_PASSWORD: \${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_VHOST: /
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+ 
+`;
+
+  const newline = content.includes("\r\n") ? "\r\n" : "\n";
+  const marker = `${newline}volumes:${newline}`;
+
+  if (!content.includes(marker)) {
+    fail(
+      `Couldn't find the top-level "volumes:" section in docker-compose.yml to insert before.`,
+    );
+  }
+
+  content = content.replace(
+    marker,
+    `${newline}${block}${newline}volumes:${newline}`,
+  );
+
+  fs.writeFileSync(composePath, content, "utf8");
+
+  return true;
+}
+
+function updateDockerComposeOverride(name: string, port: number): boolean {
+  const overridePath = path.join(ROOT, "docker-compose.override.yml");
+  if (!fs.existsSync(overridePath)) return false;
+
+  const content = fs.readFileSync(overridePath, "utf8");
+  if (hasComposeService(content, name)) return false;
+
+  const block = `
+  ${name}:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./_apps/${name}:/app/_apps/${name}
+      - ./_packages/building-blocks:/app/_packages/building-blocks
+    ports:
+      - "${port}:${port}"
+`;
+
+  fs.writeFileSync(overridePath, content.replace(/\n?$/, "\n") + block, "utf8");
+  return true;
+}
+
 function main() {
   const { name, port: explicitPort } = parseArgs(process.argv.slice(2));
 
@@ -599,6 +721,8 @@ function main() {
 
   updateTsconfigReferences(name);
   const registeredInServicesMap = updateServicesMap(name, camel);
+  const registeredInCompose = updateDockerCompose(name, port);
+  const registeredInComposeOverride = updateDockerComposeOverride(name, port);
 
   console.log(`✓ Created _apps/${name}`);
   console.log(`✓ Added project reference in tsconfig.json`);
@@ -608,6 +732,14 @@ function main() {
       : `✓ "${camel}" was already registered in _scripts/services.ts (left as-is)`,
   );
   console.log(`✓ Assigned PORT ${port}`);
+  if (registeredInCompose) {
+    console.log(`✓ Added "${name}" service to docker-compose.yml`);
+  }
+  if (registeredInComposeOverride) {
+    console.log(
+      `✓ Added "${name}" dev overrides to docker-compose.override.yml`,
+    );
+  }
 
   const envVarName = `${name.toUpperCase().replace(/-/g, "_")}_SERVICE_URL`;
 
