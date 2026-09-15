@@ -10,6 +10,9 @@
 # service name (e.g. http://auth:5001), never through the host.
 
 services:
+  #######################################################
+  #  Redis
+  #######################################################
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -21,6 +24,9 @@ services:
       timeout: 3s
       retries: 5
 
+  #######################################################
+  #  Rabbitmq
+  #######################################################
   rabbitmq:
     image: rabbitmq:4-management-alpine
     restart: unless-stopped
@@ -35,7 +41,8 @@ services:
       timeout: 5s
       retries: 5
 
-  # clean ui for rabbitMQ
+  #######################################################
+  #  Rabbit Scout - cleaner UI   #######################################################
   rabbitscout:
     image: ghcr.io/ralve-org/rabbitscout:latest
     restart: unless-stopped
@@ -49,6 +56,9 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  #######################################################
+  #  Ingress - Entry point
+  #######################################################
   ingress:
     build:
       context: .

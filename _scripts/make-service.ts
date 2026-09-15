@@ -618,7 +618,10 @@ function updateDockerCompose(name: string, port: number): boolean {
   let content = fs.readFileSync(composePath, "utf8");
   if (hasComposeService(content, name)) return false;
 
-  const block = `  ${name}:
+  const block = `#######################################################
+  #  ${name}
+  #######################################################
+  ${name}:
     build:
       context: .
       dockerfile: _apps/${name}/Dockerfile
