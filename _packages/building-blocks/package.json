@@ -66,6 +66,10 @@
     "./health": {
       "import": "./dist/Health/index.js",
       "types": "./dist/Health/index.d.ts"
+    },
+    "./dlq-monitoring": {
+      "import": "./dist/DLQMonitoring/index.js",
+      "types": "./dist/DLQMonitoring/index.d.ts"
     }
   },
   "dependencies": {
