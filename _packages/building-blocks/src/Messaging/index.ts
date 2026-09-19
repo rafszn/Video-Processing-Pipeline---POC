@@ -13,6 +13,7 @@ export {
 export {
   Consumer,
   type IConsumer,
+  type MessageMetadata,
   type SubscribeOptions,
 } from "./rabbitMQ/consumer.js";
 export type { EventMap, EventName } from "./contracts/event-map.js";

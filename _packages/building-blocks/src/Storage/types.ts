@@ -4,7 +4,7 @@ export type UploadOptions = {
 };
 
 export type StorageResourceType = "image" | "video" | "raw" | "auto";
-export type FolderName = "uploads"; // extend this
+export type FolderName = "uploads" | "vidpipelinePOC"; // extend this
 
 export interface UploadFileInput {
   buffer: Buffer;
@@ -23,4 +23,22 @@ export interface UploadedFile {
 export interface DeleteFileInput {
   key: string;
   resourceType?: Exclude<StorageResourceType, "auto">;
+}
+
+export interface PresignedUploadInput {
+  size: number;
+  filename: string;
+  folder: FolderName;
+  contentType: string;
+  expiresInSeconds?: number;
+  resourceType?: Exclude<StorageResourceType, "auto">;
+}
+
+export interface PresignedUpload {
+  uploadUrl: string;
+  key: string;
+  fileUrl: string;
+  expiresAt: Date;
+  contentType: string;
+  resourceType: Exclude<StorageResourceType, "auto">;
 }

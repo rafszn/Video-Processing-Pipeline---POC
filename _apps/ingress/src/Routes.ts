@@ -5,11 +5,11 @@ import { createServiceProxy } from "./proxy/proxy.js";
 const router = Router();
 
 router.use(
-  "/auth",
+  "/media",
   ...createServiceProxy({
-    id: services.auth.id,
-    target: services.auth.target,
-    serviceName: services.auth.serviceName,
+    id: services.media.id,
+    target: services.media.target,
+    serviceName: services.media.serviceName,
   }),
 );
 

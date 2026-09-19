@@ -70,10 +70,19 @@
     "./dlq-monitoring": {
       "import": "./dist/DLQMonitoring/index.js",
       "types": "./dist/DLQMonitoring/index.d.ts"
+    },
+    "./outbox": {
+      "import": "./dist/Outbox/index.js",
+      "types": "./dist/Outbox/index.d.ts"
+    },
+    "./inbox": {
+      "import": "./dist/Inbox/index.js",
+      "types": "./dist/Inbox/index.d.ts"
     }
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1078.0",
+    "@aws-sdk/s3-request-presigner": "^3.1135.0",
     "@scalar/express-api-reference": "^0.10.8",
     "amqplib": "^2.0.1",
     "axios": "^1.20.0",

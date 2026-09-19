@@ -16,3 +16,14 @@ services:
     volumes:
       - ./_apps/ingress:/app/_apps/ingress
       - ./_packages/building-blocks:/app/_packages/building-blocks
+
+  media:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./_apps/media:/app/_apps/media
+      - ./_packages/building-blocks:/app/_packages/building-blocks
+    ports:
+      - "5001:5001"

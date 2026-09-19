@@ -12,7 +12,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
 
   /* ---------- services urls --------- */
-  AUTH_SERVICE_URL: z.string().default("http://localhost:5001"),
+  MEDIA_SERVICE_URL: z.string().default("http://localhost:5001"),
 
   /* ---------- cache config ---------- */
   REDIS_URL: z.string().optional(),

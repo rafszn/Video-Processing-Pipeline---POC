@@ -74,6 +74,33 @@ services:
       INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-...}
       # AUTH_SERVICE_URL: http://auth:5001
 
+#######################################################
+  #  media
+  #######################################################
+  media:
+    build:
+      context: .
+      dockerfile: _apps/media/Dockerfile
+      target: production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      ALLOWED_INTERNAL_CALLERS: ingress
+      CACHE_DRIVER: redis
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_VHOST: /
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+ 
+
 volumes:
   redis-data:
   rabbitmq-data:

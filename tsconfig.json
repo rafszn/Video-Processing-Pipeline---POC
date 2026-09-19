@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./_apps/ingress" },
+    { "path": "./_apps/media" },
     { "path": "./_packages/building-blocks" }
   ]
 }

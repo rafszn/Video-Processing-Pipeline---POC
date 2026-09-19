@@ -6,6 +6,8 @@ import {
   UploadedFile,
   UploadFileInput,
   StorageResourceType,
+  PresignedUpload,
+  PresignedUploadInput,
 } from "../types.js";
 
 export interface CloudinaryStorageConfig {
@@ -87,5 +89,12 @@ export class CloudinaryStorageAdapterImpl implements StorageContract {
         },
       );
     });
+  }
+
+  async createPresignedUpload(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    input: PresignedUploadInput,
+  ): Promise<PresignedUpload> {
+    throw new Error("Not configured");
   }
 }

@@ -1,4 +1,5 @@
 import pRetry from "p-retry";
+import { injectable } from "tsyringe";
 import { randomUUID } from "node:crypto";
 import type { ConfirmChannel, Options } from "amqplib";
 import { logger } from "../../Logger/winstonLogger.js";
@@ -25,6 +26,7 @@ export interface IPublisher {
   ): Promise<void>;
 }
 
+@injectable()
 export class Publisher implements IPublisher {
   private readonly assertedExchanges = new Map<string, Promise<void>>();
   constructor(private channel: ConfirmChannel) {}

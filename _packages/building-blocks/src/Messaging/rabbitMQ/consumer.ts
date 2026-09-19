@@ -1,17 +1,18 @@
+import { injectable } from "tsyringe";
+import { QueueName } from "../contracts/queues.js";
 import { logger } from "../../Logger/winstonLogger.js";
 import type { Channel, ConsumeMessage, Options } from "amqplib";
 import type { EventMap, EventName } from "../contracts/event-map.js";
-import { QueueName } from "../contracts/queues.js";
 
 export interface MessageMetadata {
   type?: string;
   exchange: string;
-  timestamp?: number;
+  timestamp: number;
   routingKey: string;
-  messageId?: string;
+  messageId: string;
   deliveryTag: number;
   redelivered: boolean;
-  correlationId?: string;
+  correlationId: string;
   headers?: Record<string, unknown>;
 }
 
@@ -73,6 +74,7 @@ interface QueueState {
   initializationPromise: Promise<void> | null;
 }
 
+@injectable()
 export class Consumer implements IConsumer {
   private closed = false;
   private readonly queues = new Map<string, QueueState>();
@@ -543,10 +545,7 @@ export class Consumer implements IConsumer {
       this.channel.ack(message);
     } catch (error) {
       /*
-       * If we can't even route the message into the retry/DLQ pipeline,
-       * fall back to requeueing it on the main queue rather than losing it.
-       * This is bounded by the same "no reconnect strategy" gap flagged
-       * earlier — a broken channel here will fail this too.
+       If we can't even route the message into the retry/DLQ pipeline, fall back to requeueing it on the main queue rather than losing it. This is bounded by the same "no reconnect strategy" gap flagged earlier — a broken channel here will fail this too.
        */
       logger.error(
         `[RabbitMQ] Failed to route message into retry/DLQ pipeline for queue "${queue}". Requeueing instead.`,

@@ -1,12 +1,22 @@
 import {
+  UploadedFile,
+  DeleteFileInput,
+  PresignedUpload,
+  UploadFileInput,
+  PresignedUploadInput,
+} from "../types.js";
+import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import path from "path";
 import { extension } from "mime-types";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { StorageContract } from "../contracts/storage.contract.js";
-import { DeleteFileInput, UploadedFile, UploadFileInput } from "../types.js";
+
+/** presigned url max file size */
+const DEFAULT_MAX_UPLOAD_SIZE_BYTES = 1024 * 1024 * 1024; // 1 GiB
 
 export interface R2StorageConfig {
   accountId: string;
@@ -14,12 +24,14 @@ export interface R2StorageConfig {
   accessKeyId: string;
   secretAccessKey: string;
   publicBaseUrl: string;
+  maxUploadSizeBytes?: number;
 }
 
 export class R2StorageAdapterImpl implements StorageContract {
   private bucket: string;
   private client: S3Client;
   private publicBaseUrl: string;
+  private readonly maxUploadSizeBytes: number;
 
   constructor(config: R2StorageConfig) {
     const bucket = config.bucketName;
@@ -40,6 +52,8 @@ export class R2StorageAdapterImpl implements StorageContract {
 
     this.bucket = bucket;
     this.publicBaseUrl = publicBaseUrl.replace(/\/$/, "");
+    this.maxUploadSizeBytes =
+      config.maxUploadSizeBytes ?? DEFAULT_MAX_UPLOAD_SIZE_BYTES;
 
     this.client = new S3Client({
       region: "auto",
@@ -88,6 +102,60 @@ export class R2StorageAdapterImpl implements StorageContract {
       key,
       url: `${this.publicBaseUrl}/${key}`,
       resourceType: resourceType === "auto" ? "raw" : resourceType,
+    };
+  }
+
+  async createPresignedUpload(
+    input: PresignedUploadInput,
+  ): Promise<PresignedUpload> {
+    const {
+      size,
+      folder,
+      filename,
+      contentType,
+      resourceType = "raw",
+      expiresInSeconds = 900,
+    } = input;
+
+    if (size <= 0) {
+      throw new Error("Upload size must be greater than zero");
+    }
+
+    if (size > this.maxUploadSizeBytes) {
+      throw new Error(
+        `Upload exceeds the maximum allowed size of ${this.maxUploadSizeBytes} bytes`,
+      );
+    }
+
+    if (expiresInSeconds <= 0 || expiresInSeconds > 604800) {
+      throw new Error("expiresInSeconds must be between 1 and 604800 seconds");
+    }
+
+    const safeFolder = folder.replace(/^\/|\/$/g, "");
+
+    const safeFilename = path.basename(filename);
+
+    const key = `${safeFolder}/${crypto.randomUUID()}-${safeFilename}`;
+
+    const command = new PutObjectCommand({
+      Key: key,
+      Bucket: this.bucket,
+      ContentType: contentType,
+    });
+
+    const uploadUrl = await getSignedUrl(this.client, command, {
+      expiresIn: expiresInSeconds,
+    });
+
+    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
+
+    return {
+      uploadUrl,
+      key,
+      expiresAt,
+      contentType,
+      resourceType,
+      fileUrl: `${this.publicBaseUrl}/${key}`,
     };
   }
 

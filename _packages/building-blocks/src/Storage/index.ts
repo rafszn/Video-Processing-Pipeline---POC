@@ -8,3 +8,4 @@ export {
 } from "./adapters/cloudinary.adapter.js";
 export { StorageService } from "./service.js";
 export { StorageContract } from "./contracts/storage.contract.js";
+export * from "./types.js"

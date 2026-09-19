@@ -1,29 +1,31 @@
 export interface EventMap {
-  "user.created": {
-    userId: string;
-    email: string;
-    name: string;
+  "video.process.1440p": {
+    videoId: string;
+    sourceObjectKey: string;
   };
 
-  "user.deleted": {
-    userId: string;
-    email: string;
-    reason?: string;
+  "video.process.1080p": {
+    videoId: string;
+    sourceObjectKey: string;
   };
 
-  "payment.created": {
-    paymentId: string;
-    userId: string;
-    amount: number;
-    currency: string;
+  "video.process.720p": {
+    videoId: string;
+    sourceObjectKey: string;
   };
 
-  "payment.failed": {
-    paymentId: string;
-    userId: string;
-    amount: number;
-    currency: string;
-    reason: string;
+  "video.process.480p": {
+    videoId: string;
+    sourceObjectKey: string;
+  };
+
+  "video.process.360p": {
+    videoId: string;
+    sourceObjectKey: string;
+  };
+
+  "video.processing.completed": {
+    videoId: string;
   };
 }
 
