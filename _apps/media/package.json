@@ -4,9 +4,12 @@
   "description": "",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/Bootstrap.ts",
-    "make:module": "tsx scripts/make-module.ts",
-    "start": "npm run build && node dist/Bootstrap.js"
+    "dev": "concurrently -n api,worker -c blue,magenta \"npm:dev:api\" \"npm:dev:worker\"",
+    "dev:api": "tsx watch src/Bootstrap.ts",
+    "dev:worker": "tsx watch src/worker.ts",
+    "start:api": "node dist/Bootstrap.js",
+    "start:worker": "node dist/worker.js",
+    "make:module": "tsx scripts/make-module.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,12 +19,14 @@
     "@core/building-blocks": "^1.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "fluent-ffmpeg": "^2.1.3",
     "mongoose": "^9.10.1",
     "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.10.0",
     "zod": "^4.6.4"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6"
+    "@types/express": "^5.0.6",
+    "@types/fluent-ffmpeg": "^2.1.28"
   }
 }

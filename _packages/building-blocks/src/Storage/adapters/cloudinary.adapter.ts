@@ -8,6 +8,8 @@ import {
   StorageResourceType,
   PresignedUpload,
   PresignedUploadInput,
+  DownloadedFile,
+  DownloadFileInput,
 } from "../types.js";
 
 export interface CloudinaryStorageConfig {
@@ -91,10 +93,17 @@ export class CloudinaryStorageAdapterImpl implements StorageContract {
     });
   }
 
+  download(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    input: DownloadFileInput,
+  ): Promise<DownloadedFile> {
+    throw new Error("Download Not configured");
+  }
+
   async createPresignedUpload(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     input: PresignedUploadInput,
   ): Promise<PresignedUpload> {
-    throw new Error("Not configured");
+    throw new Error("createPresignedUpload Not configured");
   }
 }

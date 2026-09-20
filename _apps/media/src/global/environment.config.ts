@@ -25,6 +25,10 @@ const envSchema = z.object({
   RABBITMQ_PASSWORD: z.string().optional(),
   RABBITMQ_PORT: z.coerce.number().optional(),
 
+  /*------------ mail ---------------- */
+  RESEND_API_KEY: z.string(),
+  RESEND_FROM: z.string(),
+
   /* ---------- r2 storage --------- */
   R2_ACCOUNT_ID: z.string(),
   R2_BUCKET_NAME: z.string(),

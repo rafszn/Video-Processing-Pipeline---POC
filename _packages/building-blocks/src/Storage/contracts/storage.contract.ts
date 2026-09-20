@@ -1,8 +1,10 @@
 import {
   UploadedFile,
   DeleteFileInput,
-  PresignedUpload,
+  DownloadedFile,
   UploadFileInput,
+  PresignedUpload,
+  DownloadFileInput,
   PresignedUploadInput,
 } from "../types.js";
 
@@ -12,4 +14,5 @@ export interface StorageContract {
 
   /** single part presigned */
   createPresignedUpload(input: PresignedUploadInput): Promise<PresignedUpload>;
+  download(input: DownloadFileInput): Promise<DownloadedFile>;
 }

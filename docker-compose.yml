@@ -72,22 +72,29 @@ services:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379
       INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-...}
-      # AUTH_SERVICE_URL: http://auth:5001
+      MEDIA_SERVICE_URL: http://media:5001
 
-#######################################################
-  #  media
+  #######################################################
+  #  media - api and worker
   #######################################################
   media:
     build:
       context: .
       dockerfile: _apps/media/Dockerfile
-      target: production
+      target: api-production
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 5001
+      INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-...}
       ALLOWED_INTERNAL_CALLERS: ingress
       CACHE_DRIVER: redis
+      MONGO_URL: ${MONGO_URL:?MONGO_URL is required}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
       REDIS_URL: redis://redis:6379
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
@@ -99,7 +106,36 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
- 
+
+  media-worker:
+    build:
+      context: .
+      dockerfile: _apps/media/Dockerfile
+      target: worker-production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      ALLOWED_INTERNAL_CALLERS: ingress
+      CACHE_DRIVER: redis
+      RESEND_FROM: ${RESEND_FROM}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      MONGO_URL: ${MONGO_URL:?MONGO_URL is required}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_VHOST: / 
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   redis-data:

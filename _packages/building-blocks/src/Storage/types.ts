@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+
 export type UploadOptions = {
   folder?: string;
   resourceType?: "image" | "video" | "raw";
@@ -41,4 +43,15 @@ export interface PresignedUpload {
   expiresAt: Date;
   contentType: string;
   resourceType: Exclude<StorageResourceType, "auto">;
+}
+
+export interface DownloadFileInput {
+  key: string;
+  resourceType?: Exclude<StorageResourceType, "auto">;
+}
+
+export interface DownloadedFile {
+  stream: Readable;
+  contentType?: string;
+  contentLength?: number;
 }

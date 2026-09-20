@@ -4,16 +4,20 @@ import {
   PresignedUpload,
   UploadFileInput,
   PresignedUploadInput,
+  DownloadFileInput,
+  DownloadedFile,
 } from "../types.js";
 import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import path from "path";
 import { extension } from "mime-types";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { StorageContract } from "../contracts/storage.contract.js";
+import { Readable } from "stream";
 
 /** presigned url max file size */
 const DEFAULT_MAX_UPLOAD_SIZE_BYTES = 1024 * 1024 * 1024; // 1 GiB
@@ -102,6 +106,17 @@ export class R2StorageAdapterImpl implements StorageContract {
       key,
       url: `${this.publicBaseUrl}/${key}`,
       resourceType: resourceType === "auto" ? "raw" : resourceType,
+    };
+  }
+
+  async download(input: DownloadFileInput): Promise<DownloadedFile> {
+    const result = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: input.key }),
+    );
+    return {
+      stream: result.Body as Readable,
+      contentType: result.ContentType,
+      contentLength: result.ContentLength,
     };
   }
 

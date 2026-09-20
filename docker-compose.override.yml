@@ -19,7 +19,7 @@ services:
 
   media:
     build:
-      target: dev
+      target: api-dev
     environment:
       NODE_ENV: development
     volumes:
@@ -27,3 +27,12 @@ services:
       - ./_packages/building-blocks:/app/_packages/building-blocks
     ports:
       - "5001:5001"
+
+  media-worker:
+    build:
+      target: worker-dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./_apps/media:/app/_apps/media
+      - ./_packages/building-blocks:/app/_packages/building-blocks
