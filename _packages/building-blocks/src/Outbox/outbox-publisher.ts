@@ -1,5 +1,6 @@
 import { OutboxRecord } from "./types.js";
 import { injectable, inject } from "tsyringe";
+import { logger } from "../Logger/winstonLogger.js";
 import { IOutboxRepository } from "./outbox-repository.js";
 import { IPublisher, MessagingTokens } from "../Messaging/index.js";
 
@@ -20,6 +21,7 @@ export class OutboxPublisher {
         await this.publish(record);
         await this.repo.markPublished(record.id);
       } catch (err) {
+        logger.error("[Outbox Publisher]", err);
         await this.repo.markFailed(record.id, String(err));
       }
     }

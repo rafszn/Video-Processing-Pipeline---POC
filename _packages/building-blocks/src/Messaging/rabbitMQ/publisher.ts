@@ -49,7 +49,16 @@ export class Publisher implements IPublisher {
       persistent: options.persistent ?? true,
     };
 
-    const message = Buffer.from(JSON.stringify(payload), "utf-8");
+    const json = JSON.stringify(payload);
+    if (json === undefined) {
+      logger.error(
+        `[Publisher.publish] Cannot publish "${String(event)}": payload is not serializable (got ${typeof payload})`,
+      );
+      throw new Error(
+        `Cannot publish "${String(event)}": payload is not serializable (got ${typeof payload})`,
+      );
+    }
+    const message = Buffer.from(json, "utf-8");
 
     await pRetry(
       async () => {

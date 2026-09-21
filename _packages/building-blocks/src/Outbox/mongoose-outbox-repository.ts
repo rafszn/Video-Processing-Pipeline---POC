@@ -119,7 +119,7 @@ export function createOutboxRepository(
           { _id, ...claimableFilter(new Date(), maxAttempts) },
           { $set: { status: "claimed", claimedUntil, claimedBy: workerId } },
           { returnDocument: "after" },
-        );
+        ).lean<OutboxDocument>();
         if (doc) claimed.push(doc);
       }
 
